@@ -2,6 +2,7 @@ from ge_init import get_context
 from data_loader import load_csv
 from gx_validator import setup_validator, run_validation
 from gx_expectations import customer_rules
+from db_loader import load_to_postgres
 
 def validate_csv(filepath, suite_name):   #Calls Function to Load CSV via Panda, push to GX cloud, launch Rules and Add, then validates rules vs dataAsset(CSV)
 
@@ -32,3 +33,14 @@ if __name__ == "__main__":
     # Run validation process
     result = validate_csv(filepath, suite_name)
     print("Validation complete! Check GX Cloud for the results.")
+
+
+# Inside your if __name__ == "__main__" block:
+
+if result["success"]:   # GE validation success
+    print("✅ Validation passed, now loading into PostgreSQL...")
+    db_url = "postgresql+psycopg2://etl_user:etl@localhost:5432/etl_db"
+    load_to_postgres(df, table_name="customer_data", db_url=db_url)
+else:
+    print("❌ Validation failed. Skipping load to PostgreSQL.")
+
